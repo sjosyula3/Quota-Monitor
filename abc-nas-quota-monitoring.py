@@ -3,11 +3,9 @@ from requests.auth import HTTPBasicAuth # Basic Authentication,to the Isilon
 from texttable import Texttable
 import getpass
 
-
-abc_sites_isilon_info = [('ADC-PROD','https://adcflrm1p001.abc.amerisourcebergen.com:8080'),
-                        ('ADC-NON-PROD','https://adcflr4p001.npd.amerisourcebergen.com:8080'),
-                        ('RDC-PROD', 'https://rdcflrm1p001.abc.amerisourcebergen.com:8080'),
-                        ('RDC-NON-PROD','https://rdcflrm4p001.npd.amerisourcebergen.com:8080')]
+# Specify a site "alias name", and the isilon smartconnect FQDN (system zone) followed by the correct port number
+abc_sites_isilon_info = [('Site1','URL1'),
+                        ('Site2','URL2'),]
 
 # This list, will store all of the quotas that are 80% full - and will have to be increased.
 quotas_to_bump = list()
