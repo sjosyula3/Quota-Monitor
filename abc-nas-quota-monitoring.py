@@ -1,7 +1,7 @@
 import requests # To make GET and PUT requests to the Isilon.
 from requests.auth import HTTPBasicAuth # Basic Authentication,to the Isilon
-from texttable import Texttable
-import getpass
+from texttable import Texttable # To draw a table
+import getpass # skip echo of the password while typing
 
 # Specify a site "alias name", and the isilon smartconnect FQDN (system zone) followed by the correct port number
 abc_sites_isilon_info = [('Site1','URL1'),
@@ -21,12 +21,13 @@ display_table_2.header(['Datacenter','Quota-Configuration-is-Incorrect'])
 
 # Ask for credentials.
 # Make sure the user is a member of a role that can perform, HTTP calls to isilon API
+# Member must also be added to the admin role.
 print('\n')
 monitor_username = input('What is your username : ')
 monitor_password = getpass.getpass('What is your password : ')
 print('------------------------------------------------- \n ')
 
-
+# This function will take the site details and the quota id - and bump the available soft and hard quotas by 20 %
 def incrase_quota(url_prefix,quotaid,soft,hard):
 
     soft_proposed = int(soft + (soft * 0.20))
@@ -43,7 +44,7 @@ def incrase_quota(url_prefix,quotaid,soft,hard):
     print('Hard and Soft quota increased by 20 % ')
 
 
-# Perform a comprehensive site survey of all sites within
+# Perform a comprehensive site survey of all sites within, to gather information regarding all directory quotas
 print('Starting Site survey ...')
 for abc_site,url_prefix in abc_sites_isilon_info:
     requests.packages.urllib3.disable_warnings()
@@ -63,12 +64,15 @@ for abc_site,url_prefix in abc_sites_isilon_info:
         try:
             alert_size = quota_hard_limit * 0.80
             if quota_current_usage > alert_size:
+              # Append the quotas_to_bump, list - that will be reviewed later.
                 quotas_to_bump.append((site_query, quota_id, quota_path, quota_soft_limit,quota_hard_limit,))
                 display_table.add_row([abc_site,quota_path,
                                        str(round((quota_hard_limit/1073741824),2)) + ' GB',
                                        str(round((quota_soft_limit/quota_hard_limit)*100)) + ' %'])
 
         except TypeError:
+          # If "none/null" was found within the quota info. As in - the hard quota or soft quota was left blank to start with.
+          # Quota enforced could also be incorrect
             display_table_2.add_row([abc_site, quota_path])
             continue
     print('Site survey complete for : ',site_query)
